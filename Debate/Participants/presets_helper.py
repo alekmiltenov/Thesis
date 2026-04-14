@@ -1,5 +1,5 @@
 from enum import Enum
-import Debate.Participants.prompts as prompts
+from . import prompts
 
 class Role(Enum):
     SOLVER = "solver"
@@ -14,6 +14,13 @@ class Role(Enum):
 MODEL_PROVIDER_MAP = {
     "gpt-4.1": "openai",
     "gpt-4.1-mini": "openai",
+    "openrouter/free": "openrouter",
+    "meta-llama/llama-3.2-3b-instruct:free": "openrouter",
+    "deepseek/deepseek-r1:free": "openrouter",
+    "llama-3.1-8b-instant": "groq",
+    "llama-3.3-70b-versatile": "groq",
+
+    "qwen/qwen3.6-plus": "openrouter",
 }
 
 ROLE_PRESETS = {

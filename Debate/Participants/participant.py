@@ -1,6 +1,7 @@
-from Debate.Participants.presets_helper import ROLE_PRESETS, MODEL_PROVIDER_MAP, Role
-from Debate.Participants.prompts import BASE_PROMPT
-from provider_router import api_call
+from .presets_helper import ROLE_PRESETS, MODEL_PROVIDER_MAP, Role
+from .prompts import BASE_PROMPT
+from .provider_router import api_call
+
 
 class Participant:
     id:                         str
@@ -15,7 +16,7 @@ class Participant:
 
     def __init__(
                 self,
-                id: str,
+                id: int,
                 model: str,
                 role: Role,
                 provider: str | None = None,

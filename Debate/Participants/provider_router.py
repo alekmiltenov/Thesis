@@ -4,7 +4,9 @@ from anthropic import Anthropic
 from google import genai
 from google.genai import types
 
+
 def api_call(provider: str, model: str, system_prompt:str, prompt: str, temperature: float):
+
 
     if provider == "openai":
         client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
@@ -21,9 +23,10 @@ def api_call(provider: str, model: str, system_prompt:str, prompt: str, temperat
             "model": model,
             "provider": provider,
             "usage": getattr(response, "usage", None),
-            "raw_response": response,
+            # "raw_response": response,
         }
     
+
     if provider == "anthropic":
         client = Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
 
@@ -42,7 +45,7 @@ def api_call(provider: str, model: str, system_prompt:str, prompt: str, temperat
             "model": model,
             "provider": provider,
             "usage": getattr(response, "usage", None),
-            "raw_response": response,
+            # "raw_response": response,
         }
     
 
@@ -63,7 +66,7 @@ def api_call(provider: str, model: str, system_prompt:str, prompt: str, temperat
             "model": model,
             "provider": provider,
             "usage": getattr(response, "usage_metadata", None),
-            "raw_response": response,
+            # "raw_response": response,
         }
     
 
@@ -85,8 +88,9 @@ def api_call(provider: str, model: str, system_prompt:str, prompt: str, temperat
             "model": model,
             "provider": provider,
             "usage": getattr(response, "usage", None),
-            "raw_response": response,
+            # "raw_response": response,
         }
+
 
     if provider == "deepseek":
         client = OpenAI(
@@ -101,6 +105,35 @@ def api_call(provider: str, model: str, system_prompt:str, prompt: str, temperat
                 {"role": "user", "content": prompt},
             ],
             temperature=temperature,
+        )
+
+        return {
+            "text": response.choices[0].message.content,
+            "model": model,
+            "provider": provider,
+            "usage": getattr(response, "usage", None),
+            "raw_response": response,
+        }
+    
+
+    if provider == "openrouter":
+        client = OpenAI(
+            api_key=os.environ.get("OPENROUTER_API_KEY"),
+            base_url="https://openrouter.ai/api/v1",
+            default_headers={
+                "HTTP-Referer": "http://localhost:3000",
+                "X-OpenRouter-Title": "Thesis",
+            },
+        )
+
+        response = client.chat.completions.create(
+            model=model,
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": prompt},
+            ],
+            temperature=temperature,
+            max_tokens=512,
         )
 
         return {
