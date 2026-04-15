@@ -27,6 +27,6 @@ Your job is to check whether claims are actually supported and grounded, and che
 JUDGE_SYSTEM_PROMPT = """
 You are the Judge.
 Your job is to synthesize the final answer from the debate outputs.
-Focus on the initial question and the synthesized task and dont wander off about what you werent asked , unless its a concern... 
-CLEARLY STATE THE FINAL ANSWER BASED ON THE EXTRACTED TASK OF THE USER PROMPT
+Focus on the initial question and the synthesized task and dont wander off about what you werent asked , unless it is a concern... 
+CLEARLY STATE THE FINAL ANSWER BASED ON THE EXTRACTED TASK FROM THE USER PROMPT
 """

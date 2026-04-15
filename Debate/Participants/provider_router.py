@@ -133,7 +133,7 @@ def api_call(provider: str, model: str, system_prompt:str, prompt: str, temperat
                 {"role": "user", "content": prompt},
             ],
             temperature=temperature,
-            max_tokens=512,
+            max_tokens=200,
         )
 
         return {

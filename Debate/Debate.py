@@ -1,4 +1,5 @@
 import os
+import asyncio
 from dotenv import load_dotenv
 load_dotenv()
 from Participants.participant import Participant
@@ -46,43 +47,141 @@ class Debate:
     #     # extract clear task ( small but always appended so we dont lose track)
     #     return processed_prompt, context, task
 
-    def Debate_Round(self):
-        self.history = self.processed_prompt
-        for participant in self.participants:
-            if participant.role_type == "thinker":
-                res = participant.run_participant(self.history)
-                self.history += res["text"]
+    async def Debate_Round(self):
+        self.current_round += 1
+
+        round_block = {
+            "round": self.current_round,
+            "thinker_outputs": [],
+            "reviewer_outputs": [],
+            "final_thinker_outputs": [],
+            "judge_outputs": []
+        }
+
+        prompt_text = self.processed_prompt
+
+        if self.task:
+            prompt_text += "\n\nTASK:\n" + self.task
+
+        if self.context:
+            prompt_text += "\n\nCONTEXT:\n" + self.context
+
+        if self.history:
+            last_round = self.history[-1]
+
+            prompt_text += "\n\nLAST ROUND THINKERS:\n"
+            for output in last_round["thinker_outputs"]:
+                prompt_text += f"{output['role']} ({output['model']}):\n{output['text']}\n\n"
+
+            prompt_text += "\nLAST ROUND REVIEWERS:\n"
+            for output in last_round["reviewer_outputs"]:
+                prompt_text += f"{output['role']} ({output['model']}):\n{output['text']}\n\n"
+
+        thinkers = [participant for participant in self.participants if participant.role_type == "thinker"]
+        thinker_results = await asyncio.gather(*[
+            asyncio.to_thread(participant.run_participant, prompt_text)
+            for participant in thinkers
+        ])
+
+        for participant, res in zip(thinkers, thinker_results):
+            round_block["thinker_outputs"].append({
+                "id": participant.id,
+                "role": participant.role.value,
+                "model": participant.model,
+                "text": res["text"]
+            })
+
+            print(res["model"])
+            print(res["text"])
+
+        reviewer_prompt = prompt_text + "\n\nCURRENT ROUND THINKERS:\n"
+        for output in round_block["thinker_outputs"]:
+            reviewer_prompt += f"{output['role']} ({output['model']}):\n{output['text']}\n\n"
+
+        reviewers = [participant for participant in self.participants if participant.role_type == "reviewer"]
+        reviewer_results = await asyncio.gather(*[
+            asyncio.to_thread(participant.run_participant, reviewer_prompt)
+            for participant in reviewers
+        ])
+
+        for participant, res in zip(reviewers, reviewer_results):
+            round_block["reviewer_outputs"].append({
+                "id": participant.id,
+                "role": participant.role.value,
+                "model": participant.model,
+                "text": res["text"]
+            })
+
+            print(res["model"])
+            print(res["text"])
+
+        if self.current_round == self.rounds:
+            final_thinker_prompt = reviewer_prompt + "\n\nCURRENT ROUND REVIEWERS:\n"
+            for output in round_block["reviewer_outputs"]:
+                final_thinker_prompt += f"{output['role']} ({output['model']}):\n{output['text']}\n\n"
+
+            final_thinkers = [participant for participant in self.participants if participant.role_type == "thinker"]
+            final_thinker_results = await asyncio.gather(*[
+                asyncio.to_thread(participant.run_participant, final_thinker_prompt)
+                for participant in final_thinkers
+            ])
+
+            for participant, res in zip(final_thinkers, final_thinker_results):
+                round_block["final_thinker_outputs"].append({
+                    "id": participant.id,
+                    "role": participant.role.value,
+                    "model": participant.model,
+                    "text": res["text"]
+                })
+
                 print(res["model"])
                 print(res["text"])
-            if participant.role_type == "reviewer":
-                self.history += res["text"]
-                res = participant.run_participant(self.history)
+
+            judge_prompt = final_thinker_prompt + "\n\nFINAL THINKERS:\n"
+            for output in round_block["final_thinker_outputs"]:
+                judge_prompt += f"{output['role']} ({output['model']}):\n{output['text']}\n\n"
+
+            judges = [participant for participant in self.participants if participant.role_type == "judge"]
+            judge_results = await asyncio.gather(*[
+                asyncio.to_thread(participant.run_participant, judge_prompt)
+                for participant in judges
+            ])
+
+            for participant, res in zip(judges, judge_results):
+                round_block["judge_outputs"].append({
+                    "id": participant.id,
+                    "role": participant.role.value,
+                    "model": participant.model,
+                    "text": res["text"]
+                })
+
                 print(res["model"])
                 print(res["text"])
-            if participant.role_type == "judge":
-                res = participant.run_participant(self.history)
-                print(res["model"])
-                print(res["text"])
-            
-        return 0 
+
+        self.history.append(round_block)
+        return round_block
     
 
 
 if __name__ == "__main__":
     participants = [
         {"model": "llama-3.1-8b-instant", "role": "solver"},
-        {"model": "llama-3.1-8b-instant", "role": "explorer"},
+        {"model": "qwen/qwen3.6-plus", "role": "explorer"},
         {"model": "qwen/qwen3.6-plus", "role": "critic"},
         {"model": "llama-3.1-8b-instant", "role": "critic"},
         {"model": "llama-3.1-8b-instant", "role": "validator"},
-        {"model": "llama-3.1-8b-instant", "role": "judge"},
+        {"model": "qwen/qwen3.6-plus", "role": "judge"},
 
     ]
 
     debate = Debate(
-        rounds=1,
+        rounds=2,
         participants=participants,
-        user_prompt="Im simulating a qubit, and realistic noise environment for my project. I'm making T1 thermal excitation and i want to model how it depends on temperature. i want to calculate probabiloty each timestep dt fo excitation jump happening on my 2 by 2 density matrix represenation of the qubit. No lindblad. I want to be proper and correct so i can build it and then publish it in paper , so everything has to be good. I want to make it proper and for different temperatures because the RL agent environment will be stochastic so to adapt to different qubits , so it can make a generally better dd pulse sequence. How do i model it - what formula and what params do i bake into the qubit as specific qubit properties? Will nth bose work for thermal excitation? if yes, why , if no , why not SYNTHESIZED TASK : ANSWER THE FOLLOWING: IS NTH BOSE WHAT THE USER SHOULD MODEL THERMAL EXCITATION WITH IN HIS SPECIFIC CASE. SYNTHESIZED CONTEXT?SITUATION : NV CENTER QUBIT, SIMULATION, THERMAL EXCITTAION, SCIENTIFIC PAPER LEVEL CORRECTNESS"
+        user_prompt=""
     )
 
-    debate.Debate_Round()
+    async def main():
+        for _ in range(debate.rounds):
+            await debate.Debate_Round()
+
+    asyncio.run(main())
