@@ -123,7 +123,7 @@ export default function App() {
     <div className="app">
       <header className="app-header">
         <div className="app-header-title">
-          <span>Debate</span>
+          <span>Thesis</span>
           <span className={`status-dot status-dot--${status}`} />
         </div>
 
