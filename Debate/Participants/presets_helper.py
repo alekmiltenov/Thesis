@@ -1,6 +1,15 @@
 from enum import Enum
 from . import prompts
 
+
+# ── Orchestrator config ────────────────────────────────────────────────────────
+# Change model/provider here to use a different cheap model.
+ORCHESTRATOR_MODEL    = "claude-haiku-4-5"
+ORCHESTRATOR_PROVIDER = "anthropic"
+
+ORCHESTRATOR_SYSTEM_PROMPT = prompts.ORCHESTRATOR_SYSTEM_PROMPT
+# ──────────────────────────────────────────────────────────────────────────────
+
 class Role(Enum):
     SOLVER = "solver"
     EXPLORER = "explorer"

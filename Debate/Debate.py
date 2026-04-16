@@ -1,9 +1,11 @@
 import os
 import asyncio
+import json
 from dotenv import load_dotenv
 load_dotenv()
 from .Participants.participant import Participant
-from .Participants.presets_helper import Role
+from .Participants.presets_helper import Role, ORCHESTRATOR_MODEL, ORCHESTRATOR_PROVIDER, ORCHESTRATOR_SYSTEM_PROMPT
+from .Participants.provider_router import api_call
 
 
 class Debate:
@@ -41,11 +43,33 @@ class Debate:
         self.final_answer = None
 
 
-    # def Process_Prompt(Prompt: str):
-    #     # process user prompt ( shorten and extract core mission )
-    #     # extract contex ( used by validators )
-    #     # extract clear task ( small but always appended so we dont lose track)
-    #     return processed_prompt, context, task
+    async def Process_Prompt(self):
+        result = await asyncio.to_thread(
+            api_call,
+            ORCHESTRATOR_PROVIDER,
+            ORCHESTRATOR_MODEL,
+            ORCHESTRATOR_SYSTEM_PROMPT,
+            self.user_prompt,
+            0.3,
+        )
+        try:
+            raw = result["text"].strip()
+            if raw.startswith("```"):
+                raw = raw.split("```")[1]
+                if raw.startswith("json"):
+                    raw = raw[4:]
+            data = json.loads(raw.strip())
+            self.processed_prompt = data.get("processed_prompt") or self.user_prompt
+            self.task             = data.get("task")             or None
+            self.context          = data.get("context")          or None
+            print("\n── Orchestrator ──────────────────────────")
+            print(f"PROMPT:  {self.processed_prompt}")
+            print(f"TASK:    {self.task}")
+            print(f"CONTEXT: {self.context}")
+            print("──────────────────────────────────────────\n")
+        except (json.JSONDecodeError, KeyError):
+            print(f"[Orchestrator] Failed to parse response, using original prompt.\nRaw: {result.get('text', '')[:300]}")
+            pass
 
     async def Debate_Round(self, on_event=None):
         self.current_round += 1
@@ -212,6 +236,8 @@ class Debate:
     
 
     async def run_debate(self, on_event=None):
+        await self.Process_Prompt()
+
         if on_event:
             await on_event({
                 "type": "debate_started",

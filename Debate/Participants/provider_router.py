@@ -5,7 +5,15 @@ from google import genai
 from google.genai import types
 
 
-def api_call(provider: str, model: str, system_prompt:str, prompt: str, temperature: float):
+def api_call(provider: str, model: str, system_prompt: str, prompt: str, temperature: float):
+    try:
+        return _api_call(provider, model, system_prompt, prompt, temperature)
+    except Exception as e:
+        print(f"[ERROR] {model} ({provider}) failed: {e}")
+        return {"text": "", "model": model, "provider": provider, "usage": None, "error": str(e)}
+
+
+def _api_call(provider: str, model: str, system_prompt: str, prompt: str, temperature: float):
 
 
     if provider == "openai":
