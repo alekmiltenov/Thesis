@@ -2,8 +2,8 @@ import os
 import asyncio
 from dotenv import load_dotenv
 load_dotenv()
-from Participants.participant import Participant
-from Participants.presets_helper import Role
+from .Participants.participant import Participant
+from .Participants.presets_helper import Role
 
 
 class Debate:

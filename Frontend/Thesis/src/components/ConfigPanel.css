@@ -1,0 +1,178 @@
+.config-panel {
+  padding: 12px 20px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* ── Participants ───────────────────────── */
+.config-participants {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.participant-chip {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 4px 4px 10px;
+  border-radius: 100px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  font-size: 12px;
+  font-weight: 500;
+  transition: border-color var(--t);
+}
+
+.participant-chip--solver    { border-color: rgba(37,  99,  235, 0.3); }
+.participant-chip--explorer  { border-color: rgba(124, 58,  237, 0.3); }
+.participant-chip--critic    { border-color: rgba(217, 119, 6,   0.3); }
+.participant-chip--validator { border-color: rgba(234, 88,  12,  0.3); }
+.participant-chip--judge     { border-color: rgba(5,   150, 105, 0.3); }
+
+.chip-select {
+  border: none;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  outline: none;
+}
+
+.chip-role {
+  font-weight: 600;
+  font-size: 12px;
+  color: var(--text-primary);
+}
+
+.chip-sep {
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.chip-model {
+  font-size: 12px;
+  color: var(--text-secondary);
+  max-width: 170px;
+}
+
+.chip-remove {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  font-size: 14px;
+  line-height: 1;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--t);
+  flex-shrink: 0;
+}
+
+.chip-remove:hover {
+  background: var(--bg-raised);
+  color: var(--text-primary);
+}
+
+/* ── Input row ──────────────────────────── */
+.config-input-row {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+}
+
+.config-textarea {
+  flex: 1;
+  resize: none;
+  padding: 10px 14px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  background: var(--bg-surface);
+  min-height: 44px;
+  max-height: 140px;
+  line-height: 1.55;
+  overflow-y: auto;
+}
+
+.config-textarea:focus {
+  background: var(--bg);
+  border-color: var(--border-strong);
+}
+
+.config-textarea:disabled {
+  opacity: 0.5;
+}
+
+.config-send {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius);
+  background: var(--accent);
+  color: var(--accent-fg);
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background var(--t), opacity var(--t);
+}
+
+.config-send:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
+.config-send:disabled {
+  opacity: 0.25;
+}
+
+.config-send--stop {
+  background: #ef4444;
+}
+
+.config-send--stop:hover {
+  background: #dc2626;
+}
+
+/* ── Meta row ───────────────────────────── */
+.config-meta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.config-rounds {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.config-rounds input {
+  width: 48px;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  text-align: center;
+  font-size: 13px;
+}
+
+.config-add-btn {
+  font-size: 13px;
+  color: var(--text-secondary);
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--bg-surface);
+  transition: all var(--t);
+}
+
+.config-add-btn:hover:not(:disabled) {
+  border-color: var(--border-strong);
+  color: var(--text-primary);
+  background: var(--bg-raised);
+}
+
+.config-add-btn:disabled {
+  opacity: 0.4;
+}
