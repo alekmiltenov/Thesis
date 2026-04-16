@@ -14,6 +14,19 @@ class Role(Enum):
 MODEL_PROVIDER_MAP = {
     "gpt-4.1": "openai",
     "gpt-4.1-mini": "openai",
+    "gpt-5.4": "openai",
+    "gpt-5.4-mini": "openai",
+
+    "claude-sonnet-4-6": "anthropic",
+    "claude-opus-4-6": "anthropic",
+    "claude-haiku-4-5": "anthropic",
+
+    "gemini-2.5-pro": "google",
+    "gemini-2.5-flash": "google",
+
+    "deepseek-chat": "deepseek",
+    "deepseek-reasoner": "deepseek",
+
     "openrouter/free": "openrouter",
     "meta-llama/llama-3.2-3b-instruct:free": "openrouter",
     "deepseek/deepseek-r1:free": "openrouter",

@@ -165,17 +165,18 @@ class Debate:
 
 if __name__ == "__main__":
     participants = [
-        {"model": "llama-3.1-8b-instant", "role": "solver"},
-        {"model": "qwen/qwen3.6-plus", "role": "explorer"},
-        {"model": "qwen/qwen3.6-plus", "role": "critic"},
-        {"model": "llama-3.1-8b-instant", "role": "critic"},
-        {"model": "llama-3.1-8b-instant", "role": "validator"},
-        {"model": "qwen/qwen3.6-plus", "role": "judge"},
+        {"model": "deepseek-chat", "role": "solver"},
+        # {"model": "claude-sonnet-4-6", "role": "solver"},
+        # {"model": "qwen/qwen3.6-plus", "role": "explorer"},
+        # {"model": "qwen/qwen3.6-plus", "role": "critic"},
+        # {"model": "llama-3.1-8b-instant", "role": "critic"},
+        # {"model": "gpt-5.4-mini", "role": "validator"},
+        # {"model": "llama-3.1-8b-instant", "role": "judge"},
 
     ]
 
     debate = Debate(
-        rounds=2,
+        rounds=1,
         participants=participants,
         user_prompt=""
     )
