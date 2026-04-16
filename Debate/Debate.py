@@ -47,7 +47,7 @@ class Debate:
     #     # extract clear task ( small but always appended so we dont lose track)
     #     return processed_prompt, context, task
 
-    async def Debate_Round(self):
+    async def Debate_Round(self, on_event=None):
         self.current_round += 1
 
         round_block = {
@@ -77,43 +77,65 @@ class Debate:
             for output in last_round["reviewer_outputs"]:
                 prompt_text += f"{output['role']} ({output['model']}):\n{output['text']}\n\n"
 
-        thinkers = [participant for participant in self.participants if participant.role_type == "thinker"]
-        thinker_results = await asyncio.gather(*[
-            asyncio.to_thread(participant.run_participant, prompt_text)
-            for participant in thinkers
-        ])
+        async def run_one(participant, prompt):
+            res = await asyncio.to_thread(participant.run_participant, prompt)
+            return participant, res
 
-        for participant, res in zip(thinkers, thinker_results):
-            round_block["thinker_outputs"].append({
+        thinkers = [participant for participant in self.participants if participant.role_type == "thinker"]
+        thinker_tasks = [run_one(participant, prompt_text) for participant in thinkers]
+
+        for task in asyncio.as_completed(thinker_tasks):
+            participant, res = await task
+
+            item = {
                 "id": participant.id,
                 "role": participant.role.value,
                 "model": participant.model,
                 "text": res["text"]
-            })
+            }
+
+            round_block["thinker_outputs"].append(item)
 
             print(res["model"])
             print(res["text"])
+
+            if on_event:
+                await on_event({
+                    "type": "participant_response",
+                    "round": self.current_round,
+                    "phase": "thinker",
+                    "participant": item
+                })
 
         reviewer_prompt = prompt_text + "\n\nCURRENT ROUND THINKERS:\n"
         for output in round_block["thinker_outputs"]:
             reviewer_prompt += f"{output['role']} ({output['model']}):\n{output['text']}\n\n"
 
         reviewers = [participant for participant in self.participants if participant.role_type == "reviewer"]
-        reviewer_results = await asyncio.gather(*[
-            asyncio.to_thread(participant.run_participant, reviewer_prompt)
-            for participant in reviewers
-        ])
+        reviewer_tasks = [run_one(participant, reviewer_prompt) for participant in reviewers]
 
-        for participant, res in zip(reviewers, reviewer_results):
-            round_block["reviewer_outputs"].append({
+        for task in asyncio.as_completed(reviewer_tasks):
+            participant, res = await task
+
+            item = {
                 "id": participant.id,
                 "role": participant.role.value,
                 "model": participant.model,
                 "text": res["text"]
-            })
+            }
+
+            round_block["reviewer_outputs"].append(item)
 
             print(res["model"])
             print(res["text"])
+
+            if on_event:
+                await on_event({
+                    "type": "participant_response",
+                    "round": self.current_round,
+                    "phase": "reviewer",
+                    "participant": item
+                })
 
         if self.current_round == self.rounds:
             final_thinker_prompt = reviewer_prompt + "\n\nCURRENT ROUND REVIEWERS:\n"
@@ -121,46 +143,87 @@ class Debate:
                 final_thinker_prompt += f"{output['role']} ({output['model']}):\n{output['text']}\n\n"
 
             final_thinkers = [participant for participant in self.participants if participant.role_type == "thinker"]
-            final_thinker_results = await asyncio.gather(*[
-                asyncio.to_thread(participant.run_participant, final_thinker_prompt)
-                for participant in final_thinkers
-            ])
+            final_thinker_tasks = [run_one(participant, final_thinker_prompt) for participant in final_thinkers]
 
-            for participant, res in zip(final_thinkers, final_thinker_results):
-                round_block["final_thinker_outputs"].append({
+            for task in asyncio.as_completed(final_thinker_tasks):
+                participant, res = await task
+
+                item = {
                     "id": participant.id,
                     "role": participant.role.value,
                     "model": participant.model,
                     "text": res["text"]
-                })
+                }
+
+                round_block["final_thinker_outputs"].append(item)
 
                 print(res["model"])
                 print(res["text"])
+
+                if on_event:
+                    await on_event({
+                        "type": "participant_response",
+                        "round": self.current_round,
+                        "phase": "final_thinker",
+                        "participant": item
+                    })
 
             judge_prompt = final_thinker_prompt + "\n\nFINAL THINKERS:\n"
             for output in round_block["final_thinker_outputs"]:
                 judge_prompt += f"{output['role']} ({output['model']}):\n{output['text']}\n\n"
 
             judges = [participant for participant in self.participants if participant.role_type == "judge"]
-            judge_results = await asyncio.gather(*[
-                asyncio.to_thread(participant.run_participant, judge_prompt)
-                for participant in judges
-            ])
+            judge_tasks = [run_one(participant, judge_prompt) for participant in judges]
 
-            for participant, res in zip(judges, judge_results):
-                round_block["judge_outputs"].append({
+            for task in asyncio.as_completed(judge_tasks):
+                participant, res = await task
+
+                item = {
                     "id": participant.id,
                     "role": participant.role.value,
                     "model": participant.model,
                     "text": res["text"]
-                })
+                }
+
+                round_block["judge_outputs"].append(item)
+                self.final_answer = res["text"]
 
                 print(res["model"])
                 print(res["text"])
 
+                if on_event:
+                    await on_event({
+                        "type": "participant_response",
+                        "round": self.current_round,
+                        "phase": "judge",
+                        "participant": item
+                    })
+
         self.history.append(round_block)
+
+        if on_event:
+            await on_event({
+                "type": "round_complete",
+                "round": self.current_round,
+                "round_block": round_block
+            })
+
         return round_block
     
+
+    async def run_debate(self, on_event=None):
+        if on_event:
+            await on_event({
+                "type": "debate_started",
+                "rounds": self.rounds,
+                "participants": [
+                    {"id": p.id, "model": p.model, "role": p.role.value, "role_type": p.role_type}
+                    for p in self.participants
+                ]
+            })
+
+        for _ in range(self.rounds):
+            await self.Debate_Round(on_event=on_event)
 
 
 if __name__ == "__main__":
