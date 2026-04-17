@@ -1,0 +1,245 @@
+.matrix-view {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 20px;
+  gap: 12px;
+}
+
+.matrix-empty {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.matrix-hint {
+  font-size: 12px;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+/* ── Table ───────────────────────────────── */
+.matrix-scroll {
+  flex: 1;
+  overflow: auto;
+}
+
+.matrix-table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.matrix-corner {
+  min-width: 120px;
+}
+
+.matrix-col-header,
+.matrix-row-header {
+  padding: 10px 12px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.matrix-col-header {
+  border-bottom: 1px solid var(--border);
+  vertical-align: bottom;
+}
+
+.matrix-row-header {
+  border-right: 1px solid var(--border);
+  text-align: right;
+}
+
+.matrix-model-name {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 3px;
+}
+
+/* ── Cells ───────────────────────────────── */
+.matrix-cell {
+  width: 72px;
+  height: 64px;
+  text-align: center;
+  vertical-align: middle;
+  border: 1px solid var(--border);
+  transition: background var(--t);
+}
+
+.matrix-cell--self {
+  background: var(--bg-surface);
+}
+
+.matrix-cell--clickable {
+  cursor: pointer;
+}
+
+.matrix-cell--clickable:hover {
+  background: var(--bg-raised);
+}
+
+.matrix-cell-self {
+  color: var(--text-muted);
+  font-size: 16px;
+}
+
+.matrix-cell-icon {
+  font-size: 16px;
+  color: var(--text-secondary);
+}
+
+.matrix-cell-dot {
+  color: var(--text-muted);
+  font-size: 18px;
+}
+
+/* ── Badges ──────────────────────────────── */
+.matrix-badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: capitalize;
+  padding: 2px 7px;
+  border-radius: 100px;
+  background: var(--bg-surface);
+}
+
+.matrix-badge--solver    { color: var(--c-solver);    }
+.matrix-badge--explorer  { color: var(--c-explorer);  }
+.matrix-badge--critic    { color: var(--c-critic);    }
+.matrix-badge--validator { color: var(--c-validator); }
+.matrix-badge--judge     { color: var(--c-judge);     }
+
+/* ── Modal ───────────────────────────────── */
+.matrix-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.12);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  z-index: 20;
+  animation: fade-in 0.15s ease;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.matrix-modal {
+  background: var(--bg);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-xl);
+  width: 100%;
+  max-width: 840px;
+  max-height: 72vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  animation: modal-in 0.2s ease;
+}
+
+@keyframes modal-in {
+  from { transform: scale(0.97); opacity: 0; }
+  to   { transform: scale(1);    opacity: 1; }
+}
+
+.matrix-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.matrix-modal-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.matrix-modal-close {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  font-size: 18px;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  transition: all var(--t);
+}
+
+.matrix-modal-close:hover {
+  background: var(--bg-surface);
+  color: var(--text-primary);
+}
+
+.matrix-modal-body {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+/* ── Side-by-side columns ────────────────── */
+.matrix-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.matrix-col:first-child {
+  border-right: 1px solid var(--border);
+}
+
+.matrix-col-header-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.matrix-col-model {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.matrix-col-responses {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.matrix-response-meta {
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  margin-bottom: 5px;
+}
+
+.matrix-response-text {
+  font-size: 13px;
+  line-height: 1.65;
+  color: var(--text-primary);
+  white-space: pre-wrap;
+  word-break: break-word;
+}

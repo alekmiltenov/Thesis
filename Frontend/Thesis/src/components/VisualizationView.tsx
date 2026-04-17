@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import type { VizLane, VizNode, Phase, DebateStatus } from '../types'
+import DisagreementMatrix from './DisagreementMatrix'
 import './VisualizationView.css'
 
 interface Props {
@@ -25,10 +26,10 @@ interface ModalState {
 }
 
 // ── Viz type selector (extensible) ────────
-type VizType = 'pipeline'
+type VizType = 'pipeline' | 'matrix'
 const VIZ_TYPES: { key: VizType; label: string }[] = [
   { key: 'pipeline', label: 'Pipeline' },
-  // future: { key: 'matrix', label: 'Disagreement Matrix' }
+  { key: 'matrix',   label: 'Disagreement Matrix' },
 ]
 
 export default function VisualizationView({ lanes, status }: Props) {
@@ -68,7 +69,9 @@ export default function VisualizationView({ lanes, status }: Props) {
         </div>
       </div>
 
-      <div className="viz-feed" ref={feedRef}>
+      {vizType === 'matrix' && <DisagreementMatrix lanes={lanes} />}
+
+      <div className="viz-feed" ref={feedRef} style={{ display: vizType === 'pipeline' ? 'flex' : 'none' }}>
         {lanes.length === 0 && (
           <div className="viz-empty">
             {status === 'running'
@@ -132,7 +135,7 @@ export default function VisualizationView({ lanes, status }: Props) {
         })}
       </div>
 
-      {modal && (
+      {modal && vizType === 'pipeline' && (
         <div className="viz-modal-overlay" onClick={() => setModal(null)}>
           <div className="viz-modal" onClick={e => e.stopPropagation()}>
             <div className="viz-modal-header">
